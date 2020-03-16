@@ -1,9 +1,7 @@
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Appium.Android;
-using OpenQA.Selenium.Appium.Enums;
-using OpenQA.Selenium.Remote;
-using System.Diagnostics;
+using OpenQA.Selenium.Appium.Enums; 
 using System.IO;
 
 namespace AppiumCSharp
@@ -25,7 +23,7 @@ namespace AppiumCSharp
             driverOptions.AddAdditionalCapability("appActivity", "com.google.android.apps.youtube.app.WatchWhileActivity"); 
             driverOptions.AddAdditionalCapability(MobileCapabilityType.App, @"C:\Users\weslley\Desktop\YouTube.apk"); 
             driverOptions.AddAdditionalCapability("noSign", true);
-
+            
             driver = new AndroidDriver<AndroidElement>(new System.Uri("http://127.0.0.1:4723/wd/hub"), driverOptions);
             driver.Manage().Timeouts().ImplicitWait = (new System.TimeSpan(0, 0, 0, 10)); 
         }
