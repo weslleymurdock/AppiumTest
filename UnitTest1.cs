@@ -20,6 +20,7 @@ namespace AppiumCSharp
             driverOptions.AddAdditionalCapability(MobileCapabilityType.NewCommandTimeout, 12000); 
             driverOptions.AddAdditionalCapability("uiautomator2ServerInstallTimeout", 80000);
             driverOptions.AddAdditionalCapability("uiautomator2ServerLaunchTimeout", 80000); 
+            driverOptions.AddAdditionalCapability("adbExecTimeout", 80000); 
             driverOptions.AddAdditionalCapability("appActivity", "com.google.android.apps.youtube.app.WatchWhileActivity"); 
             driverOptions.AddAdditionalCapability(MobileCapabilityType.App, @"C:\Users\weslley\Desktop\YouTube.apk"); 
             driverOptions.AddAdditionalCapability("noSign", true);
@@ -35,13 +36,12 @@ namespace AppiumCSharp
         }
 
         [Test()]
-        public void TestShouldSendKetsToSearchBoxThenCheckTheValue()
-        {
-            var screenshot = driver.GetScreenshot();
-            var file = $"screenshot{System.DateTime.Now.Ticks}.png";
-            var f = File.Create(file);
-            f.Close();
-            screenshot.SaveAsFile(file,ScreenshotImageFormat.Png); 
+        public void TestButtonHomeExistsText()
+        { 
+            var fileName = $"screenshot{System.DateTime.Now.Ticks}.png";
+            var file = File.Create(fileName);
+            file.Close();
+            driver.GetScreenshot().SaveAsFile(fileName,ScreenshotImageFormat.Png); 
             Assert.AreEqual("Home",
                 driver.FindElement(By.XPath("//android.widget.Button[@content-desc=\"Home\"]/android.widget.TextView")).Text);
         }
