@@ -1,56 +1,60 @@
+
 using NUnit.Framework;
-using OpenQA.Selenium;
 using OpenQA.Selenium.Appium.Android;
 using OpenQA.Selenium.Appium.Enums;
-using System;
-using System.IO;
+using OpenQA.Selenium.Appium.iOS;
+using OpenQA.Selenium.Appium.Windows;
+using OpenQA.Selenium.Remote;
 
 namespace AppiumCSharp
 {
-    public class Tests
+    public class MobileTests
     {
-        private AndroidDriver<AndroidElement> driver;
-        OpenQA.Selenium.DriverOptions driverOptions;
+        private RemoteWebDriver driver;
+        private OpenQA.Selenium.Appium.AppiumOptions options;
         [SetUp]
         public void Setup()
         {
-            driverOptions = new OpenQA.Selenium.Appium.AppiumOptions();
-            //YoutubeOptions();
-            ChromeOptions();
-            driver = new AndroidDriver<AndroidElement>(new System.Uri("http://127.0.0.1:4723/wd/hub"), driverOptions);
-            driver.Manage().Timeouts().ImplicitWait = (new System.TimeSpan(0, 0, 0, 10));
+            Options('a');
+            var driverUri = new System.Uri("http://127.0.0.1:4727/wd/hub");
+            StartSession(driverUri,'w');
+        }
+        private void StartSession(System.Uri driverUri, char v = 'a')
+        {
+            if (v == 'a')
+                driver = new AndroidDriver<AndroidElement>(driverUri, options);
+            else if (v == 'i')
+                driver = new IOSDriver<IOSElement>(driverUri, options);
+            else if (v == 'w')
+                driver = new WindowsDriver<WindowsElement>(driverUri, options);
+            driver.Manage().Timeouts().ImplicitWait = new System.TimeSpan(420000);
         }
 
-        private void ChromeOptions()
+        private void Options(char v = 'a')
         {
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.PlatformName, "Android");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.PlatformVersion, "10");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.AutomationName, "UIAutomator2");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.DeviceName, "nexus_5_q_10_0_-_api_29");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.NewCommandTimeout, 12000);
-            driverOptions.AddAdditionalCapability("uiautomator2ServerInstallTimeout", 80000);
-            driverOptions.AddAdditionalCapability("uiautomator2ServerLaunchTimeout", 80000);
-            driverOptions.AddAdditionalCapability("adbExecTimeout", 80000);
-            driverOptions.AddAdditionalCapability("appActivity", "com.google.android.apps.chrome.Main");
-            driverOptions.AddAdditionalCapability("appWaitActivity", "org.chromium.chrome.browser.firstrun.FirstRunActivity");
-            //driverOptions.AddAdditionalCapability(MobileCapabilityType.BrowserName, MobileBrowserType.Chrome);
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.App, @"C:\Users\weslley\Desktop\Chrome.apk");
-            driverOptions.AddAdditionalCapability("noSign", true);
-        }
+            options = new OpenQA.Selenium.Appium.AppiumOptions();
 
-        private void YoutubeOptions()
-        {
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.PlatformName, "Android");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.PlatformVersion, "10");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.AutomationName, "UIAutomator2");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.DeviceName, "nexus_5_q_10_0_-_api_29");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.NewCommandTimeout, 12000);
-            driverOptions.AddAdditionalCapability("uiautomator2ServerInstallTimeout", 80000);
-            driverOptions.AddAdditionalCapability("uiautomator2ServerLaunchTimeout", 80000);
-            driverOptions.AddAdditionalCapability("adbExecTimeout", 80000);
-            driverOptions.AddAdditionalCapability("appActivity", "com.google.android.apps.youtube.app.WatchWhileActivity");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.App, @"C:\Users\weslley\Desktop\YouTube.apk");
-            driverOptions.AddAdditionalCapability("noSign", true);
+            if (v == 'a')
+            {
+                options.AddAdditionalCapability(MobileCapabilityType.PlatformName, "Android");
+                options.AddAdditionalCapability(MobileCapabilityType.PlatformVersion, "11");
+                options.AddAdditionalCapability(MobileCapabilityType.AutomationName, "UIAutomator2");
+                options.AddAdditionalCapability(MobileCapabilityType.DeviceName, "foo");
+                options.AddAdditionalCapability(MobileCapabilityType.BrowserName, "Chrome");
+            }
+            else if (v == 'i')
+            {
+                options.AddAdditionalCapability(MobileCapabilityType.PlatformName, "iOS");
+                options.AddAdditionalCapability(MobileCapabilityType.PlatformVersion, "14.3");
+                options.AddAdditionalCapability(MobileCapabilityType.AutomationName, "XCUITest");
+                options.AddAdditionalCapability(MobileCapabilityType.DeviceName, "iPhone 12 Pro Max");
+                options.AddAdditionalCapability(MobileCapabilityType.BrowserName, "Safari");
+            }
+            else if (v == 'w')
+            {
+                options.AddAdditionalCapability("app", "\\Windows\\System32\\cmd.exe");
+                options.AddAdditionalCapability("deviceName", "WindowsPC");
+            }
         }
 
         [TearDown()]
@@ -59,30 +63,72 @@ namespace AppiumCSharp
             driver?.Quit();
         }
 
-        //[Test()]
-        //public void TestButtonHomeExistsText()
-        //{
-        //    var fileName = $"screenshot{System.DateTime.Now.Ticks}.png";
-        //    var file = File.Create(fileName);
-        //    file.Close();
-        //    driver.GetScreenshot().SaveAsFile(fileName, ScreenshotImageFormat.Png);
-        //    Assert.AreEqual("Home",
-        //        driver.FindElement(By.XPath("//android.widget.Button[@content-desc=\"Home\"]/android.widget.TextView")).Text);
-        //}
         [Test()]
-        public void TestChromeNavigation()
+        public void TestNavigation()
         {
-            var page = "Tesouro Direto";
+            driver.Navigate().GoToUrl("https://github.com/weslleyluiz/");
+            System.Threading.Thread.Sleep(7000);
+            var pageCode = driver.PageSource;
 
-            driver.FindElement(By.XPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.support.v4.view.ViewPager/android.widget.FrameLayout/android.widget.Button")).Click();
-            driver.FindElement(By.XPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.support.v4.view.ViewPager/android.widget.FrameLayout/android.widget.Button")).Click();
-            driver.FindElement(By.XPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.support.v4.view.ViewPager/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.Button[1]")).Click();
-            driver.FindElement(By.XPath("//android.support.v7.widget.RecyclerView[@content-desc=\"New tab\"]/android.widget.LinearLayout[1]/android.widget.LinearLayout/android.widget.EditText")).SendKeys("www.tesourodireto.com.br");
-            System.Threading.Thread.Sleep(123123);
-            driver.FindElement(By.XPath("/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.FrameLayout/android.view.ViewGroup/android.widget.FrameLayout[2]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.EditText")).SendKeys("www.google.com");
+            Assert.Contains("<title>weslleyluiz", pageCode.Split(' '));
+        }
+        [Test()]
+        public void TestFingerPrint()
+        {
+            if ((driver as AndroidDriver<AndroidElement>) == null)
+                return;
+            System.Diagnostics.Debug.WriteLine("fingerprint test");
+            ((AndroidDriver<AndroidElement>)driver).FingerPrint(1);
+            System.Threading.Thread.Sleep(400);
+            System.Diagnostics.Debug.WriteLine("fingerprint test");
+            ((AndroidDriver<AndroidElement>)driver).FingerPrint(1);
+            ((AndroidDriver<AndroidElement>)driver).FingerPrint(1);
+            System.Threading.Thread.Sleep(400);
+            System.Diagnostics.Debug.WriteLine("end fingerprint test");
+        }
 
+        [Test()]
+        public void PrintAppKeys()
+        {
+            System.Diagnostics.Debug.WriteLine("app keys");
+            var keys = ((AndroidDriver<AndroidElement>)driver).GetAppStringDictionary();
+            System.Threading.Thread.Sleep(400);
+            foreach (var key in keys)
+            {
+                System.Diagnostics.Debug.WriteLine(key.Key + " => " + key.Value);
+            }
+        }
 
-            //Assert.AreEqual(page, driver.FindElement(By.XPath, "/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.FrameLayout/android.view.ViewGroup/android.widget.FrameLayout[2]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.EditText"))
+        [Test()]
+        public void AssertKeysContainsKey()
+        {
+            //var isIos = driver as IOSDriver<IOSElement> is not null; /// c# 9 rules 
+            var isIos = (driver as IOSDriver<IOSElement>) != null && (driver as AndroidDriver<AndroidElement>) == null;
+            if (isIos)
+            {
+                var iosDriver = (IOSDriver<IOSElement>)driver;
+                var b = iosDriver.PullFolder("/Users/weslleyluiz/Library/Developer/CoreSimulator/Devices/AC721224-0B13-42A2-9BB8-5907E0DD8C2C/data");
+                for (int i = 0; i < b.Length; i++)
+                {
+                    System.Diagnostics.Debug.WriteLine(b[i].ToString());
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("os keys");
+                var keys = ((AndroidDriver<AndroidElement>)driver).Settings.Keys;
+                foreach (var key in keys)
+                {
+                    System.Diagnostics.Debug.Write("\n" + key + " => ");
+                    System.Diagnostics.Debug.WriteLine(((AndroidDriver<AndroidElement>)driver)?.Settings[key].ToString());
+                }
+                Assert.Contains("trackScrollEvents", keys);
+                Assert.Contains("shutdownOnPowerDisconnect", keys);
+                Assert.Contains("normalizeTagNames", keys);
+                Assert.Contains("waitForSelectorTimeout", keys);
+                Assert.Contains("waitForIdleTimeout", keys);
+                Assert.Contains("shouldUseCompactResponses", keys);
+            }
         }
     }
 }
